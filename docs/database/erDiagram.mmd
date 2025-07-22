@@ -1,0 +1,117 @@
+erDiagram
+    %% User Management
+    USER {
+        BIGINT id PK "AUTO_INCREMENT"
+        VARCHAR(50) username UK "NOT NULL, UNIQUE"
+        VARCHAR(255) password "NOT NULL"
+        VARCHAR(100) email UK "NOT NULL, UNIQUE"
+        TIMESTAMP created_at "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    ROLE {
+        BIGINT id PK "AUTO_INCREMENT"
+        VARCHAR(50) name UK "NOT NULL, UNIQUE"
+    }
+
+    PERMISSION {
+        BIGINT id PK "AUTO_INCREMENT"
+        VARCHAR(100) name UK "NOT NULL, UNIQUE"
+        VARCHAR(255) description "NOT NULL"
+        VARCHAR(50) resource "NOT NULL"
+        VARCHAR(50) action "NOT NULL"
+    }
+
+    USER_ROLES {
+        BIGINT user_id PK,FK
+        BIGINT role_id PK,FK
+    }
+
+    ROLE_PERMISSIONS {
+        BIGINT role_id PK,FK
+        BIGINT permission_id PK,FK
+    }
+
+    %% Product Management
+    PRODUCT {
+        BIGINT id PK "AUTO_INCREMENT"
+        VARCHAR(255) name "NOT NULL"
+        TEXT description
+        DECIMAL price
+        INTEGER stock
+        VARCHAR category
+        BOOLEAN availability
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    %% Deal Management
+    DEAL_TYPE {
+        BIGINT id PK "AUTO_INCREMENT"
+        VARCHAR(255) name "NOT NULL"
+        TEXT description
+        VARCHAR(100) strategy_class
+    }
+
+    DEAL {
+        BIGINT id PK "AUTO_INCREMENT"
+        BIGINT product_id FK "NOT NULL"
+        BIGINT deal_type_id FK "NOT NULL"
+        DECIMAL discount_percent
+        DECIMAL discount_amount
+        INTEGER minimum_quantity
+        TIMESTAMP expiration_date
+        TIMESTAMP created_at
+    }
+
+    %% Shopping Basket
+    BASKET {
+        BIGINT id PK "AUTO_INCREMENT"
+        BIGINT user_id FK "NOT NULL"
+        VARCHAR(20) status "NOT NULL, DEFAULT 'ACTIVE'"
+        TIMESTAMP created_at "DEFAULT CURRENT_TIMESTAMP"
+    }
+
+    BASKET_ITEM {
+        BIGINT id PK "AUTO_INCREMENT"
+        BIGINT basket_id FK "NOT NULL"
+        BIGINT product_id FK "NOT NULL"
+        INTEGER quantity "NOT NULL, DEFAULT 1"
+    }
+
+    %% Order Management
+    ORDER_TABLE {
+        BIGINT id PK "AUTO_INCREMENT"
+        BIGINT user_id FK "NOT NULL"
+        DECIMAL total_amount
+        DECIMAL total_discount
+        DECIMAL final_amount
+        TIMESTAMP order_date
+        TEXT note
+    }
+
+    ORDER_ITEM {
+        BIGINT id PK "AUTO_INCREMENT"
+        BIGINT order_id FK "NOT NULL"
+        BIGINT product_id FK "NOT NULL"
+        INTEGER quantity "NOT NULL"
+        DECIMAL unit_price "NOT NULL"
+        DECIMAL total_price "NOT NULL"
+        DECIMAL discount_applied "DEFAULT 0"
+    }
+
+    %% Relationships
+    USER ||--o{ USER_ROLES : "has"
+    ROLE ||--o{ USER_ROLES : "assigned to"
+    ROLE ||--o{ ROLE_PERMISSIONS : "has"
+    PERMISSION ||--o{ ROLE_PERMISSIONS : "granted to"
+
+    PRODUCT ||--o{ DEAL : "has deals"
+    DEAL_TYPE ||--o{ DEAL : "defines"
+
+    USER ||--o{ BASKET : "owns"
+    BASKET ||--o{ BASKET_ITEM : "contains"
+    PRODUCT ||--o{ BASKET_ITEM : "added to"
+
+    USER ||--o{ ORDER_TABLE : "places"
+    ORDER_TABLE ||--o{ ORDER_ITEM : "contains"
+    PRODUCT ||--o{ ORDER_ITEM : "ordered as"
